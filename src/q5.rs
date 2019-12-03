@@ -2,60 +2,102 @@ use std::collections::HashMap;
 
 pub struct Solution {}
 
-impl Solution {
-  pub fn longest_palindrome(s: String) -> String {
+pub struct Handler {
+  src: String,
+  hash: HashMap<String, bool>,
+}
+
+impl Handler {
+  pub fn new(src: String) -> Handler {
+    Handler {
+      src,
+      hash: HashMap::new(),
+    }
+  }
+
+  fn is_cycle(&mut self, i: usize, j: usize, b: &[u8]) -> bool {
+    let key = [i.to_string(), j.to_string()].join("-");
+    if b[i] != b[j] {
+      self.hash.insert(key, false);
+      return false;
+    }
+
+    if i == j {
+      // ponit to same shoul not happen
+      panic!("should not happend {} {}", i, j);
+    }
+
+    let dist = j - i;
+    if dist == 1 || dist == 2 {
+      // naboure or combine one
+      self.hash.insert(key, true);
+      return true;
+    }
+
+    match self.hash.get(&key) {
+      Some(v) => {
+        //println!("hash result:{}", *v);
+        return *v;
+      }
+      None => {
+        let result = self.is_cycle(i + 1, j - 1, b);
+        //println!("hash insert for :{} {}", key, result);
+        self.hash.insert(key, result);
+        return result;
+      }
+    }
+
+    // check if hit hash
+    //println!("hash check for :{}", key);
+  }
+
+  pub fn check(&mut self) -> String {
     let mut start = 0;
     let mut end = 0;
-    let mut hash = HashMap::new();
     let mut pos = 0;
+    let len = self.src.len();
 
-    for c in s.chars() {
-      println!("process: {}", c);
-      match hash.get(&c) {
-        Some(v) => {
-          println!("v: {} pos: {}", *v, pos);
-          // found repeat, check
-          let len = pos - *v + 1;
-          let current = end - start + 1;
-          if len > current {
-            let half = len / 2;
-            let mut is_break = false;
-            for i in 0..half {
-              let start_pos = *v + i as usize;
-              let l = &s[start_pos..start_pos + 1];
-              let r = &s[pos - i..pos - i + 1];
+    if len == 0 {
+      return String::from("");
+    }
 
-              println!("l: {} r: {}", l, r);
-              if l != r {
-                is_break = true;
-                break;
-              }
-            }
+    if len == 1 {
+      return self.src[0..1].to_string();
+    }
 
-            if !is_break {
-              // found more longer, have a check on previous start
-              if c == &s[end..end + 1].chars().get(0) {
-                let prev = &s[start..start + 1];
-                if (c == prev) {}
-              }
+    let new_str = String::from(self.src.to_string());
 
-              start = *v;
-              end = pos;
-            }
+    let b = new_str.as_bytes();
+
+    for i in 0..len {
+      for j in i + 1..len {
+        let current_len = j - i + 1;
+        let current_max = end - start + 1;
+
+        if current_len > current_max {
+          let result = self.is_cycle(i, j, b);
+          if result {
+            // replace it
+            start = i;
+            end = j;
           }
         }
-        None => (),
       }
-
-      hash.insert(c, pos);
-      pos += 1;
     }
 
     if end > start {
-      s[start..end + 1].to_string()
+      self.src[start..end + 1].to_string()
     } else {
-      String::from("")
+      //String::from("")
+      return self.src[0..1].to_string();
     }
+  }
+}
+
+impl Solution {
+  pub fn longest_palindrome(s: String) -> String {
+    let mut h = Handler::new(s);
+    return h.check();
   }
 }
 
@@ -65,7 +107,8 @@ mod tests {
 
   #[test]
   fn test_5() {
-    //assert_eq!(Solution::longest_palindrome("aaaaa".to_owned()), "aaaaa");
+    //assert_eq!(Solution::longest_palindrome("cyyoacmjwjubfkzrrbvquqkwhsxvmytmjvbborrtoiyotobzjmohpadfrvmxuagbdczsjuekjrmcwyaovpiogspbslcppxojgbfxhtsxmecgqjfuvahzpgprscjwwutwoiksegfreortttdotgxbfkisyakejihfjnrdngkwjxeituomuhmeiesctywhryqtjimwjadhhymydlsmcpycfdzrjhstxddvoqprrjufvihjcsoseltpyuaywgiocfodtylluuikkqkbrdxgjhrqiselmwnpdzdmpsvbfimnoulayqgdiavdgeiilayrafxlgxxtoqskmtixhbyjikfmsmxwribfzeffccczwdwukubopsoxliagenzwkbiveiajfirzvngverrbcwqmryvckvhpiioccmaqoxgmbwenyeyhzhliusupmrgmrcvwmdnniipvztmtklihobbekkgeopgwipihadswbqhzyxqsdgekazdtnamwzbitwfwezhhqznipalmomanbyezapgpxtjhudlcsfqondoiojkqadacnhcgwkhaxmttfebqelkjfigglxjfqegxpcawhpihrxydprdgavxjygfhgpcylpvsfcizkfbqzdnmxdgsjcekvrhesykldgptbeasktkasyuevtxrcrxmiylrlclocldmiwhuizhuaiophykxskufgjbmcmzpogpmyerzovzhqusxzrjcwgsdpcienkizutedcwrmowwolekockvyukyvmeidhjvbkoortjbemevrsquwnjoaikhbkycvvcscyamffbjyvkqkyeavtlkxyrrnsmqohyyqxzgtjdavgwpsgpjhqzttukynonbnnkuqfxgaatpilrrxhcqhfyyextrvqzktcrtrsbimuokxqtsbfkrgoiznhiysfhzspkpvrhtewthpbafmzgchqpgfsuiddjkhnwchpleibavgmuivfiorpteflholmnxdwewj".to_owned()), "aaaaa");
+    assert_eq!(Solution::longest_palindrome("aaaaa".to_owned()), "aaaaa");
     assert_eq!(Solution::longest_palindrome("babab".to_owned()), "babab");
     assert_eq!(Solution::longest_palindrome("babcd".to_owned()), "bab");
     assert_eq!(Solution::longest_palindrome("cbbd".to_owned()), "bb");
