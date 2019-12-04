@@ -1,24 +1,24 @@
-use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
 pub struct Solution {}
 
 pub struct Handler {
   src: String,
-  hash: HashMap<String, bool>,
+  map: [Option<bool>; 1000000],
 }
 
 impl Handler {
   pub fn new(src: String) -> Handler {
     Handler {
       src,
-      hash: HashMap::new(),
+      map: [None; 1000000],
     }
   }
 
   fn is_cycle(&mut self, i: usize, j: usize, b: &[u8]) -> bool {
-    let key = [i.to_string(), j.to_string()].join("-");
+    let key = i * 1000 + j;
     if b[i] != b[j] {
-      self.hash.insert(key, false);
+      self.map[key] = Some(false);
       return false;
     }
 
@@ -30,31 +30,25 @@ impl Handler {
     let dist = j - i;
     if dist == 1 || dist == 2 {
       // naboure or combine one
-      self.hash.insert(key, true);
+      self.map[key] = Some(true);
       return true;
     }
 
-    match self.hash.get(&key) {
+    match self.map[key] {
       Some(v) => {
-        //println!("hash result:{}", *v);
-        return *v;
+        return v;
       }
       None => {
         let result = self.is_cycle(i + 1, j - 1, b);
-        //println!("hash insert for :{} {}", key, result);
-        self.hash.insert(key, result);
+        self.map[key] = Some(result);
         return result;
       }
     }
-
-    // check if hit hash
-    //println!("hash check for :{}", key);
   }
 
   pub fn check(&mut self) -> String {
     let mut start = 0;
     let mut end = 0;
-    let mut pos = 0;
     let len = self.src.len();
 
     if len == 0 {
@@ -66,11 +60,10 @@ impl Handler {
     }
 
     let new_str = String::from(self.src.to_string());
-
     let b = new_str.as_bytes();
 
     for i in 0..len {
-      for j in i + 1..len {
+      for j in (i..len).rev() {
         let current_len = j - i + 1;
         let current_max = end - start + 1;
 
@@ -88,7 +81,6 @@ impl Handler {
     if end > start {
       self.src[start..end + 1].to_string()
     } else {
-      //String::from("")
       return self.src[0..1].to_string();
     }
   }
@@ -96,8 +88,14 @@ impl Handler {
 
 impl Solution {
   pub fn longest_palindrome(s: String) -> String {
+    let start = Instant::now();
     let mut h = Handler::new(s);
-    return h.check();
+    let r = h.check();
+
+    let elapsed = start.elapsed();
+    println!("execute spend: {:?}", elapsed);
+
+    return r;
   }
 }
 
@@ -107,8 +105,12 @@ mod tests {
 
   #[test]
   fn test_5() {
-    //assert_eq!(Solution::longest_palindrome("cyyoacmjwjubfkzrrbvquqkwhsxvmytmjvbborrtoiyotobzjmohpadfrvmxuagbdczsjuekjrmcwyaovpiogspbslcppxojgbfxhtsxmecgqjfuvahzpgprscjwwutwoiksegfreortttdotgxbfkisyakejihfjnrdngkwjxeituomuhmeiesctywhryqtjimwjadhhymydlsmcpycfdzrjhstxddvoqprrjufvihjcsoseltpyuaywgiocfodtylluuikkqkbrdxgjhrqiselmwnpdzdmpsvbfimnoulayqgdiavdgeiilayrafxlgxxtoqskmtixhbyjikfmsmxwribfzeffccczwdwukubopsoxliagenzwkbiveiajfirzvngverrbcwqmryvckvhpiioccmaqoxgmbwenyeyhzhliusupmrgmrcvwmdnniipvztmtklihobbekkgeopgwipihadswbqhzyxqsdgekazdtnamwzbitwfwezhhqznipalmomanbyezapgpxtjhudlcsfqondoiojkqadacnhcgwkhaxmttfebqelkjfigglxjfqegxpcawhpihrxydprdgavxjygfhgpcylpvsfcizkfbqzdnmxdgsjcekvrhesykldgptbeasktkasyuevtxrcrxmiylrlclocldmiwhuizhuaiophykxskufgjbmcmzpogpmyerzovzhqusxzrjcwgsdpcienkizutedcwrmowwolekockvyukyvmeidhjvbkoortjbemevrsquwnjoaikhbkycvvcscyamffbjyvkqkyeavtlkxyrrnsmqohyyqxzgtjdavgwpsgpjhqzttukynonbnnkuqfxgaatpilrrxhcqhfyyextrvqzktcrtrsbimuokxqtsbfkrgoiznhiysfhzspkpvrhtewthpbafmzgchqpgfsuiddjkhnwchpleibavgmuivfiorpteflholmnxdwewj".to_owned()), "aaaaa");
-    assert_eq!(Solution::longest_palindrome("aaaaa".to_owned()), "aaaaa");
+    /*assert_eq!(
+      Solution::longest_palindrome("zhqusxzrjcwgsdpcienkizutedcwrmowwolekockvyukyv".to_owned()),
+      "aaaaa"
+    );*/
+    assert_eq!(Solution::longest_palindrome("cyyoacmjwjubfkzrrbvquqkwhsxvmytmjvbborrtoiyotobzjmohpadfrvmxuagbdczsjuekjrmcwyaovpiogspbslcppxojgbfxhtsxmecgqjfuvahzpgprscjwwutwoiksegfreortttdotgxbfkisyakejihfjnrdngkwjxeituomuhmeiesctywhryqtjimwjadhhymydlsmcpycfdzrjhstxddvoqprrjufvihjcsoseltpyuaywgiocfodtylluuikkqkbrdxgjhrqiselmwnpdzdmpsvbfimnoulayqgdiavdgeiilayrafxlgxxtoqskmtixhbyjikfmsmxwribfzeffccczwdwukubopsoxliagenzwkbiveiajfirzvngverrbcwqmryvckvhpiioccmaqoxgmbwenyeyhzhliusupmrgmrcvwmdnniipvztmtklihobbekkgeopgwipihadswbqhzyxqsdgekazdtnamwzbitwfwezhhqznipalmomanbyezapgpxtjhudlcsfqondoiojkqadacnhcgwkhaxmttfebqelkjfigglxjfqegxpcawhpihrxydprdgavxjygfhgpcylpvsfcizkfbqzdnmxdgsjcekvrhesykldgptbeasktkasyuevtxrcrxmiylrlclocldmiwhuizhuaiophykxskufgjbmcmzpogpmyerzovzhqusxzrjcwgsdpcienkizutedcwrmowwolekockvyukyvmeidhjvbkoortjbemevrsquwnjoaikhbkycvvcscyamffbjyvkqkyeavtlkxyrrnsmqohyyqxzgtjdavgwpsgpjhqzttukynonbnnkuqfxgaatpilrrxhcqhfyyextrvqzktcrtrsbimuokxqtsbfkrgoiznhiysfhzspkpvrhtewthpbafmzgchqpgfsuiddjkhnwchpleibavgmuivfiorpteflholmnxdwewj".to_owned()), "aaaaa");
+    assert_eq!(Solution::longest_palindrome("bananas".to_owned()), "anana");
     assert_eq!(Solution::longest_palindrome("babab".to_owned()), "babab");
     assert_eq!(Solution::longest_palindrome("babcd".to_owned()), "bab");
     assert_eq!(Solution::longest_palindrome("cbbd".to_owned()), "bb");
