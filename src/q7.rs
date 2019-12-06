@@ -4,7 +4,6 @@ impl Solution {
   pub fn reverse(x: i32) -> i32 {
     let mut p = x as i64;
     let mut result: i64 = 0;
-    let mut count = 0;
     let base: i64 = 2;
 
     let upper_bound: i64 = base.pow(31) - 1;
@@ -22,8 +21,6 @@ impl Solution {
       if result > upper_bound || result < lower_bound {
         return 0;
       }
-
-      count += 1;
     }
   }
 }
