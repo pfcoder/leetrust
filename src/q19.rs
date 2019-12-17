@@ -18,8 +18,8 @@ pub struct Solution {}
 use super::util::linked_list::{to_list, ListNode};
 impl Solution {
     pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-        let mut dummy_head = Some(Box::new(ListNode { val: 0, next: head }));
-        {
+        //let mut dummy_head = Some(Box::new(ListNode { val: 0, next: head }));
+        /*{
             let locate = || {
                 // double pointer method
                 let mut end = dummy_head.as_ref();
@@ -52,9 +52,9 @@ impl Solution {
             }
         }
         //start.as_mut().unwrap().next = start.as_ref().unwrap().next.as_ref().unwrap().next.take();
-        dummy_head.unwrap().next
+        dummy_head.unwrap().next*/
 
-        /*let mut dummy_head = Some(Box::new(ListNode { val: 0, next: head }));
+        let mut dummy_head = Some(Box::new(ListNode { val: 0, next: head }));
         let mut len = 0;
         {
             let mut p = dummy_head.as_ref();
@@ -72,7 +72,7 @@ impl Solution {
             let next = p.as_mut().unwrap().next.as_mut().unwrap().next.take();
             p.as_mut().unwrap().next = next;
         }
-        dummy_head.unwrap().next*/
+        dummy_head.unwrap().next
     }
 }
 
