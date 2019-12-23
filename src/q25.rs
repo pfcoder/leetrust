@@ -2,31 +2,40 @@ use super::util::linked_list::{to_list, ListNode};
 pub struct Solution {}
 #[allow(dead_code)]
 impl Solution {
-    fn find_bound(mut start: Option<Box<ListNode>>, k: i32) -> (Option<Box<ListNode>>, i32) {
+    fn find_bound(start: Option<&Box<ListNode>>, k: i32) -> (Option<&Box<ListNode>>, i32) {
         let mut step_count = 0;
-        let mut move_p = start.take();
+        let mut move_p = start;
         while step_count < k - 1 {
             step_count += 1;
             if move_p.as_ref().unwrap().next == None {
                 break;
             }
-            move_p = move_p.unwrap().next.take();
+            move_p = move_p.as_ref().unwrap().next.as_ref();
         }
 
         (move_p, step_count)
     }
 
-    /*fn swap(start: &mut Box<ListNode>, steps: i32) -> () {
+    fn swap(start: Option<&Box<ListNode>>, end: Option<&Box<ListNode>>, steps: i32) -> () {
         let mut step_count = 0;
-        let mut move_p = start.as_ptr();
+        let mut move_start = start.unwrap();
+        let mut move_end = end.unwrap();
         while step_count < steps {
             step_count += 1;
-            move_p = &mut move_p.next.as_mut().unwrap();
+            unsafe {
+                let tmp1 = move_start.val;
+                let tmp2 = move_end.val;
+                Solution::im2mut(move_start).val = tmp2;
+                Solution::im2mut(move_end).val = tmp1;
+            }
         }
+    }
 
-        move_p.val = 1;
-        start.val = 1;
-    }*/
+    unsafe fn im2mut<T>(reference: &T) -> &mut T {
+        let const_ptr = reference as *const T;
+        let mut_ptr = const_ptr as *mut T;
+        &mut *mut_ptr
+    }
 
     pub fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
         if head == None {
@@ -35,7 +44,21 @@ impl Solution {
 
         let mut dummy_head = Some(Box::new(ListNode { val: 0, next: head }));
 
-        //let (mut end, mut steps) = Solution::find_bound(dummy_head.as_mut().unwrap().next, k);
+        let mut start = dummy_head.as_ref().unwrap().next.as_ref();
+
+        let (mut end, mut steps) = Solution::find_bound(start, k);
+
+        let tmp1 = end.unwrap();
+        let tmp2 = start.unwrap();
+
+        unsafe {
+            let mut tmp = Solution::im2mut(tmp1);
+            tmp.val = 1;
+        }
+
+        //let x = Box::into_raw(*end.unwrap());
+
+        //end.unwrap().val = 1;
         //move_steps = steps;
 
         /*if move_steps == k - 1 {
