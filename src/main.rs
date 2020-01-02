@@ -1,13 +1,25 @@
-/*use leetcode::q10::Solution;
+use leetcode::q897::Solution;
+use leetcode::util::tree::to_tree;
+
+macro_rules! tree {
+  () => {
+      None
+  };
+  ($($e:expr),*) => {
+      {
+          let vec = vec![$(stringify!($e)), *];
+          let vec = vec.into_iter().map(|v| v.parse::<i32>().ok()).collect::<Vec<_>>();
+          to_tree(vec)
+      }
+  };
+  ($($e:expr,)*) => {(tree![$($e),*])};
+}
 
 fn main() {
-  println!("start");
-  println!(
-    "result: {}",
-    Solution::is_match("a".to_string(), ".*..a*".to_string())
-  );
-}*/
-
+    println!("start");
+    Solution::increasing_bst(tree![4, 3]);
+}
+/*
 use crate::List::*;
 
 enum List {
@@ -72,4 +84,4 @@ fn main() {
     // Show the final state of the list
     println!("linked list has length: {}", list.len());
     println!("{}", list.stringify());
-}
+}*/

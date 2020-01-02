@@ -18,46 +18,78 @@ impl Handler {
 
     pub fn increasing_bst(
         &mut self,
-        root: &Option<Rc<RefCell<TreeNode>>>,
+        root: Option<Rc<RefCell<TreeNode>>>,
     ) -> Option<Rc<RefCell<TreeNode>>> {
-        self.middle_trav(&root);
+        self.middle_trav(root);
         self.head.clone()
     }
 
-    fn middle_trav(&mut self, current: &Option<Rc<RefCell<TreeNode>>>) -> () {
-        if *current == None {
+    fn middle_trav(&mut self, current: Option<Rc<RefCell<TreeNode>>>) -> () {
+        if current == None {
             return;
         }
 
         // Left
-        self.middle_trav(&(current.as_ref().unwrap().borrow().left));
-        println!("c:{}", current.as_ref().unwrap().borrow().val);
-        //current.as_ref().unwrap().borrow_mut().left = None;
+        self.middle_trav(current.as_ref().unwrap().borrow().left.clone());
+
+        println!("cu:{}", current.as_ref().unwrap().borrow().val);
 
         if self.last != None {
-            println!("l:{}", self.last.as_ref().unwrap().borrow().val);
-            self.last.as_ref().unwrap().borrow_mut().right = current.clone();
-            self.last.as_ref().unwrap().borrow_mut().left = None;
+            unsafe {
+                let t = self.last.as_ref().unwrap().as_ptr();
+                let mut x = &mut *t;
+                //x.right = current.clone();
+                //x.right = None;
+                x.left = None;
+            }
         } else {
             // first
             self.head = current.clone();
         }
 
         self.last = current.clone();
-        //current.as_ref().unwrap().borrow_mut().left = None;
-        println!("----");
-
-        // Right
-        self.middle_trav(&(current.as_ref().unwrap().borrow().right));
+        // right
+        self.middle_trav(current.as_ref().unwrap().borrow().right.clone());
     }
 }
 
 pub struct Solution {}
-
+/*
 impl Solution {
     pub fn increasing_bst(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
         let mut h = Handler::new();
-        h.increasing_bst(&root)
+        h.increasing_bst(root)
+    }
+}*/
+
+impl Solution {
+    pub fn increasing_bst(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
+        let node = Some(Rc::new(RefCell::new(TreeNode::new(0))));
+        Self::do_increasing_bst(root, node.clone());
+        node.unwrap().borrow().right.clone()
+    }
+
+    #[inline]
+    fn ptr_node<'a>(n: &'a Option<Rc<RefCell<TreeNode>>>) -> &'a mut TreeNode {
+        let t = n.as_ref().unwrap().as_ptr();
+        unsafe { &mut *t }
+    }
+
+    pub fn do_increasing_bst(
+        root: Option<Rc<RefCell<TreeNode>>>,
+        tail: Option<Rc<RefCell<TreeNode>>>,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        if root != None {
+            let left_tail =
+                Self::do_increasing_bst(root.as_ref().unwrap().borrow().left.clone(), tail.clone());
+
+            Self::ptr_node(&root).left = None;
+            Self::ptr_node(&left_tail).right = root.clone();
+
+            Self::do_increasing_bst(root.as_ref().unwrap().borrow().right.clone(), root.clone())
+        } else {
+            tail
+        }
     }
 }
 
@@ -70,6 +102,8 @@ mod tests {
         assert_eq!(
             Solution::increasing_bst(tree![5, 3, 6, 2, 4, null, 8, 1, null, null, null, 7, 9]),
             tree![1, null, 2, null, 3, null, 4, null, 5, null, 6, null, 7, null, 8, null, 9]
-        )
+        );
+
+        //assert_eq!(Solution::increasing_bst(tree![4, 3]), tree![3, null, 4])
     }
 }
