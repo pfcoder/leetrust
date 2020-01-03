@@ -76,22 +76,51 @@ impl Solution {
     }
 
     pub fn do_increasing_bst(
-        root: Option<Rc<RefCell<TreeNode>>>,
+        mut root: Option<Rc<RefCell<TreeNode>>>,
         tail: Option<Rc<RefCell<TreeNode>>>,
     ) -> Option<Rc<RefCell<TreeNode>>> {
         if root != None {
-            let left_tail =
-                Self::do_increasing_bst(root.as_ref().unwrap().borrow().left.clone(), tail.clone());
+            let left_tail = Self::do_increasing_bst(
+                root.as_ref().unwrap().borrow_mut().left.take(),
+                tail.clone(),
+            );
 
             Self::ptr_node(&root).left = None;
             Self::ptr_node(&left_tail).right = root.clone();
 
-            Self::do_increasing_bst(root.as_ref().unwrap().borrow().right.clone(), root.clone())
+            Self::do_increasing_bst(
+                root.as_ref().unwrap().borrow_mut().right.clone(),
+                root.clone(),
+            )
         } else {
+            //println!("t:{}", tail.as_ref().unwrap().borrow().val);
             tail
         }
     }
 }
+/*
+impl Solution {
+    pub fn increasing_bst(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
+        let node = Some(Rc::new(RefCell::new(TreeNode::new(0))));
+        Self::do_increasing_bst(root, node.clone());
+        node.unwrap().borrow().right.clone()
+    }
+    pub fn do_increasing_bst(
+        root: Option<Rc<RefCell<TreeNode>>>,
+        tail: Option<Rc<RefCell<TreeNode>>>,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        if let Some(node) = root {
+            let mut left_tail =
+                Self::do_increasing_bst(node.borrow_mut().left.take(), tail.clone());
+            left_tail.unwrap().borrow_mut().right = Some(node.clone());
+            let right = node.borrow_mut().right.take();
+            Self::do_increasing_bst(right, Some(node))
+        } else {
+            println!("t:{}", tail.as_ref().unwrap().borrow().val);
+            tail
+        }
+    }
+}*/
 
 #[cfg(test)]
 mod tests {
