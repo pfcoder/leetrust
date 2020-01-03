@@ -76,24 +76,26 @@ impl Solution {
     }
 
     pub fn do_increasing_bst(
-        mut root: Option<Rc<RefCell<TreeNode>>>,
+        root: Option<Rc<RefCell<TreeNode>>>,
         tail: Option<Rc<RefCell<TreeNode>>>,
     ) -> Option<Rc<RefCell<TreeNode>>> {
         if root != None {
             let left_tail = Self::do_increasing_bst(
-                root.as_ref().unwrap().borrow_mut().left.take(),
+                root.as_ref().unwrap().borrow_mut().left.clone(),
                 tail.clone(),
             );
 
-            Self::ptr_node(&root).left = None;
-            Self::ptr_node(&left_tail).right = root.clone();
+            //Self::ptr_node(&root).left = None;
+            //Self::ptr_node(&left_tail).right = root.clone();
 
-            Self::do_increasing_bst(
-                root.as_ref().unwrap().borrow_mut().right.clone(),
-                root.clone(),
-            )
+            root.as_ref().unwrap().borrow_mut().left = None;
+            left_tail.as_ref().unwrap().borrow_mut().right = root.clone();
+
+            let right = root.as_ref().unwrap().borrow().right.clone();
+
+            Self::do_increasing_bst(right, root.clone())
         } else {
-            //println!("t:{}", tail.as_ref().unwrap().borrow().val);
+            // println!("t:{}", tail.as_ref().unwrap().borrow().val);
             tail
         }
     }
@@ -113,7 +115,7 @@ impl Solution {
             let mut left_tail =
                 Self::do_increasing_bst(node.borrow_mut().left.take(), tail.clone());
             left_tail.unwrap().borrow_mut().right = Some(node.clone());
-            let right = node.borrow_mut().right.take();
+            let right = node.borrow_mut().right.clone();
             Self::do_increasing_bst(right, Some(node))
         } else {
             println!("t:{}", tail.as_ref().unwrap().borrow().val);
@@ -133,6 +135,6 @@ mod tests {
             tree![1, null, 2, null, 3, null, 4, null, 5, null, 6, null, 7, null, 8, null, 9]
         );
 
-        //assert_eq!(Solution::increasing_bst(tree![4, 3]), tree![3, null, 4])
+        assert_eq!(Solution::increasing_bst(tree![4, 3]), tree![3, null, 4])
     }
 }
