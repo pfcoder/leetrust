@@ -1,23 +1,11 @@
-use leetcode::q897::Solution;
-use leetcode::util::tree::to_tree;
-
-macro_rules! tree {
-  () => {
-      None
-  };
-  ($($e:expr),*) => {
-      {
-          let vec = vec![$(stringify!($e)), *];
-          let vec = vec.into_iter().map(|v| v.parse::<i32>().ok()).collect::<Vec<_>>();
-          to_tree(vec)
-      }
-  };
-  ($($e:expr,)*) => {(tree![$($e),*])};
-}
+//mod q897;
+//mod util;
+//use q897::Solution;
+//use util::tree::to_tree;
 
 fn main() {
     println!("start");
-    Solution::increasing_bst(tree![4, 3]);
+    //Solution::increasing_bst(tree![4, 3]);
 }
 /*
 use crate::List::*;
